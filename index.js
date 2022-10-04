@@ -90,7 +90,7 @@ app.get('/', async (req, res) => {
     song_id = song_ids[Math.floor(Math.random() * song_ids.length)]
 
     token_call(async function (token) {
-        options = {
+        let options = {
             method: 'GET',
             url: "https://api.spotify.com/v1/tracks/"+song_id,
 
@@ -101,13 +101,25 @@ app.get('/', async (req, res) => {
             }
         }
         await axios.request(options).then(function (response) {
-            
+            var hint_1 = 'The album is '+response.data.album.name
+            if (response.data.album.name == response.data.name){
+                hint_1 = 'The song name is.. ' + hintify(response.data.name)
+            }
             res.json({
                 'answer':response.data.name,
-                'hint_1':response.data.album.name,
-                'hint_2':response.data.artists[0].name,
-                'hint_3':hintify(response.data.name),
-                'image':response.data.album.images[0]
+                'hint_1':hint_1,
+                'hint_2':'The artist is ' + response.data.artists[0].name,
+                'hint_3':response.data.album.images[0].url,
+                'error':''
+            })
+        }).catch((err)=>{
+
+            res.json({
+                'answer':null,
+                'hint_1':null,
+                'hint_2':null,
+                'hint_3':null,
+                'error' : err
             })
         })
     })
